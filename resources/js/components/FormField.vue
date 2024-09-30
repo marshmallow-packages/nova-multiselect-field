@@ -1,7 +1,7 @@
 <template>
-  <DefaultField :field="field" :showHelpText="showHelpText" :errors="errors">
+  <DefaultField :field="currentField" :showHelpText="showHelpText" :errors="errors">
     <template #field>
-      <div class="outl1ne-multiselect-field flex flex-col">
+      <div class="flex flex-col outl1ne-multiselect-field">
         <!-- Multi select field -->
         <multiselect
           v-if="!reorderMode"
@@ -12,32 +12,33 @@
           label="label"
           :group-label="isOptionGroups ? 'label' : void 0"
           :group-values="isOptionGroups ? 'values' : void 0"
-          :group-select="field.groupSelect || false"
+          :group-select="currentField.groupSelect || false"
           ref="multiselect"
           :value="selected"
-          :options="field.apiUrl ? asyncOptions : computedOptions"
-          :internal-search="!field.apiUrl"
-          :class="errorClasses"
-          :disabled="isReadonly"
-          :placeholder="field.placeholder || field.name"
-          :close-on-select="field.max === 1 || !isMultiselect"
+          :options="currentField.apiUrl ? asyncOptions : computedOptions"
+          :internal-search="!currentField.apiUrl"
+          :class="[errorClasses, { 'has-optiongroup': isOptionGroups }]"
+          :disabled="currentField.readonly"
+          :placeholder="currentField.placeholder || currentField.name"
+          :close-on-select="currentField.max === 1 || !isMultiselect"
           :multiple="isMultiselect"
-          :max="max || field.max || null"
-          :optionsLimit="field.optionsLimit || 1000"
-          :limit="field.limit"
+          :max="max || currentField.max || null"
+          :optionsLimit="currentField.optionsLimit || 1000"
+          :limit="currentField.limit"
           :limitText="count => __('novaMultiselect.limitText', { count: String(count || '') })"
           selectLabel=""
           :loading="isLoading"
           selectGroupLabel=""
           selectedLabel=""
+          tagPlaceholder=""
           deselectLabel=""
           deselectGroupLabel=""
-          :clearOnSelect="field.clearOnSelect || false"
-          :taggable="field.taggable || false"
+          :clearOnSelect="currentField.clearOnSelect || false"
+          :taggable="currentField.taggable || false"
           @tag="addTag"
         >
           <template #maxElements>
-            {{ __('novaMultiselect.maxElements', { max: String(field.max || '') }) }}
+            {{ __('novaMultiselect.maxElements', { max: String(currentField.max || '') }) }}
           </template>
 
           <template #noResult>
@@ -45,38 +46,42 @@
           </template>
 
           <template #noOptions>
-            {{ field.apiUrl ? __('novaMultiSelect.startTypingForOptions') : __('novaMultiselect.noOptions') }}
+            {{ currentField.apiUrl ? __('novaMultiSelect.startTypingForOptions') : __('novaMultiselect.noOptions') }}
           </template>
 
           <template #clear>
             <div
               class="multiselect__clear"
-              v-if="field.nullable && (isMultiselect ? value.length : value)"
+              v-if="currentField.nullable && (isMultiselect ? value.length : value)"
               @mousedown.prevent.stop="value = isMultiselect ? [] : null"
-            ></div>
+            />
           </template>
 
           <template #singleLabel>
             <span>{{ value ? value.label : '' }}</span>
           </template>
+
+          <template #tag="{ option, remove }">
+            <form-multiselect-field-tag :option="option" :remove="remove" />
+          </template>
         </multiselect>
 
         <!-- Reorder mode field -->
-        <div v-if="reorderMode" class="form-input-bordered py-1 px-2 rounded-md">
+        <div v-if="reorderMode" class="px-2 py-1 rounded-lg form-input-bordered">
           <ul class="flex flex-col pl-0" style="list-style: none; margin-top: 5px">
-            <vue-draggable v-model="value" tag="transition-group">
+            <VueDraggable v-model="value" tag="transition-group">
               <template #item="{ element }">
-                <li class="reorder__tag text-sm mb-1 px-2 py-1 text-white">
+                <li class="px-2 py-1 mb-1 text-sm text-white reorder__tag">
                   {{ element.label }}
                 </li>
               </template>
-            </vue-draggable>
+            </VueDraggable>
           </ul>
         </div>
 
         <div
-          v-if="field.reorderable"
-          class="ml-auto mt-2 text-sm font-bold text-primary cursor-pointer dim"
+          v-if="currentField.reorderable"
+          class="mt-2 ml-auto text-sm font-bold cursor-pointer text-primary dim"
           @click="reorderMode = !reorderMode"
         >
           {{ __(reorderMode ? 'novaMultiselect.doneReordering' : 'novaMultiselect.reorder') }}
@@ -87,7 +92,7 @@
 </template>
 
 <script>
-import { FormField, HandlesValidationErrors } from 'laravel-nova';
+import { DependentFormField, HandlesValidationErrors } from 'laravel-nova';
 import HandlesFieldValue from '../mixins/HandlesFieldValue';
 import Multiselect from 'vue-multiselect/src/Multiselect';
 import VueDraggable from 'vuedraggable';
@@ -96,9 +101,9 @@ import debounce from 'lodash/debounce';
 export default {
   components: { Multiselect, VueDraggable },
 
-  mixins: [FormField, HandlesValidationErrors, HandlesFieldValue],
+  mixins: [HandlesValidationErrors, HandlesFieldValue, DependentFormField],
 
-  props: ['resourceName', 'resourceId', 'field'],
+  props: ['resourceName', 'resourceId', 'field', 'mode'],
 
   data: () => ({
     reorderMode: false,
@@ -112,9 +117,11 @@ export default {
 
   mounted() {
     window.addEventListener('scroll', this.repositionDropdown);
+    this.onSyncedField();
 
     if (this.field.optionsDependOn) {
       this.options = [];
+      this.setInitialValue();
 
       Nova.$on(`multiselect-${this.safeDependsOnAttribute}-input`, values => {
         values = Array.isArray(values) ? values : [values]; // Handle singleSelect
@@ -155,6 +162,9 @@ export default {
           });
           this.max = Math.max(...maxValues) || null;
         }
+
+        // Emit new value so fields down the line also get refreshed
+        Nova.$emit(`multiselect-${this.field.attribute}-input`, this.value);
       });
     }
 
@@ -204,32 +214,26 @@ export default {
         const valuesArray = this.getInitialFieldValuesArray();
         this.value = valuesArray && valuesArray.length ? valuesArray.map(this.getValueFromOptions).filter(Boolean) : [];
       } else {
-        this.value = this.getValueFromOptions(this.field.value);
+        this.value = this.getValueFromOptions(this.currentField.value);
       }
+
+      // Emit new value so fields down the line also get refreshed
+      this.currentField.value = !this.value ? '' : this.isMultiselect ? this.value.map(v => v.value) : this.value.value;
     },
 
-    fill(formData) {
+    fillIfVisible(formData, attribute) {
+      if (!this.currentlyIsVisible) return;
+
       if (this.isMultiselect) {
         if (this.value && this.value.length) {
           this.value.forEach((v, i) => {
-            formData.append(`${this.field.attribute}[${i}]`, v.value);
+            formData.append(`${attribute}[${i}]`, v.value);
           });
         } else {
-          formData.append(this.field.attribute, '');
+          formData.append(attribute, '');
         }
       } else {
-        formData.append(this.field.attribute, (this.value && this.value.value) || '');
-      }
-    },
-
-    addTag(newTag) {
-      if (this.isTaggable) {
-        const parts = newTag.split(', ');
-        const tag = {
-          label: newTag,
-          value: newTag,
-        };
-        this.value.push(tag);
+        formData.append(attribute, (this.value && this.value.value) || '');
       }
     },
 
@@ -246,6 +250,10 @@ export default {
       this.value = value;
       this.$nextTick(() => this.repositionDropdown());
       Nova.$emit(`multiselect-${this.field.attribute}-input`, this.value);
+      this.emitFieldValueChange(
+        this.field.attribute,
+        !this.value ? '' : this.isMultiselect ? this.value.map(v => v.value) : this.value.value
+      );
     },
 
     handleOpen() {
@@ -305,6 +313,16 @@ export default {
         const { top, height, bottom } = el.getBoundingClientRect();
         if (onOpen) ms.$refs.list.scrollTop = 0;
 
+        // Find parent with 'fixed' class
+        let parent = el.parentElement;
+        let fixedModal = void 0;
+        if (document.querySelectorAll('.fixed.modal').length > 0) {
+          while (parent && !fixedModal) {
+            if (parent.classList.contains('fixed')) fixedModal = parent;
+            parent = parent.parentElement;
+          }
+        }
+
         const fromBottom = (window.innerHeight || document.documentElement.clientHeight) - bottom;
 
         ms.$refs.list.style.position = 'fixed';
@@ -313,11 +331,14 @@ export default {
         if (fromBottom < 300) {
           ms.$refs.list.style.top = 'auto';
           ms.$refs.list.style.bottom = `${fromBottom + height}px`;
-          ms.$refs.list.style['border-radius'] = '3px 3px 0 0';
+          ms.$refs.list.style['border-radius'] = '5px 5px 0 0';
         } else {
+          const adjustedTop = fixedModal
+            ? top - (parseInt(window.getComputedStyle(fixedModal)['padding-top']) || 0)
+            : top;
           ms.$refs.list.style.bottom = 'auto';
-          ms.$refs.list.style.top = `${top + height}px`;
-          ms.$refs.list.style['border-radius'] = '0 0 3px 3px';
+          ms.$refs.list.style.top = `${adjustedTop + height}px`;
+          ms.$refs.list.style['border-radius'] = '0 0 5px 5px';
         }
       };
 
@@ -341,7 +362,8 @@ export default {
     },
 
     fetchOptions: debounce(async function (search) {
-      const { data } = await Nova.request().get(`${this.field.apiUrl}`, { params: { search } });
+      const resourceId = this.resourceId || '';
+      const { data } = await Nova.request().get(`${this.currentField.apiUrl}`, { params: { search, resourceId } });
 
       // Response is not an array or an object
       if (typeof data !== 'object') throw new Error('Server response was invalid.');
@@ -373,7 +395,7 @@ export default {
     }, 500),
 
     tryToFetchOptions(query) {
-      if (!this.field.apiUrl) return;
+      if (!this.currentField.apiUrl) return;
 
       if (query.length >= 1) {
         this.asyncOptions = [];
@@ -387,19 +409,45 @@ export default {
         this.asyncOptions = [];
       }
     },
+
+    onSyncedField() {
+      this.options = this.currentField.options || [];
+      this.setInitialValue();
+    },
   },
 };
 </script>
 
 <style lang="scss">
 .outl1ne-multiselect-field {
+  .multiselect {
+    min-height: 36px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    display: block;
+    &.has-optiongroup {
+      .multiselect__option:not(.multiselect__option--group) {
+        padding-left: 24px;
+      }
+    }
+  }
+
   .multiselect__tags {
     --tw-border-opacity: 1;
-    border-width: 0px;
+    border-width: 1px;
+    // min-height: 18px;
+    min-height: 2.25rem;
+    border-radius: 0.25rem;
 
+    padding: 8px 56px 0 6px;
+    overflow: hidden;
     border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
     background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
     color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+
+    font-size: 0.875rem;
+    line-height: 1.25rem;
 
     .dark & {
       border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
@@ -410,8 +458,10 @@ export default {
 
   .multiselect__input {
     border: none;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-    color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+    color: rgba(var(--colors-gray-500), var(--tw-text-opacity));
 
     .dark & {
       background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
@@ -421,13 +471,11 @@ export default {
 
   .multiselect__tag {
     background-color: rgba(var(--colors-primary-500));
-    color: var(--colors-white) !important;
+    font-weight: 600;
+    padding: 4px 24px 4px 8px;
+    margin: 1px 8px 1px 0;
+    color: rgba(var(--colors-white));
     --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    font-weight: 700;
-
-    /* .dark & {
-      color: rgba(var(--colors-gray-900), var(--tw-text-opacity));
-    } */
 
     .multiselect__tag-icon {
       &::after {
@@ -435,10 +483,10 @@ export default {
       }
 
       &:hover {
-        background: rgba(var(--colors-primary-400));
+        background: rgba(var(--colors-primary-500));
 
         &::after {
-          color: rgba(var(--colors-primary-500));
+          color: rgba(var(--colors-red-500));
         }
       }
     }
@@ -448,18 +496,23 @@ export default {
     &::before,
     &::after {
       width: 2px;
-      background: rgba(var(--colors-gray-400));
+      background: rgb(var(--colors-gray-400));
     }
 
     &:hover {
       &::before,
       &::after {
-        background: rgba(var(--colors-primary-400));
+        background: rgba(var(--colors-red-400));
       }
     }
   }
 
   .multiselect__single {
+    min-height: 18px;
+    color: rgba(var(--colors-gray-600));
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+
     background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
     color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
 
@@ -470,6 +523,8 @@ export default {
   }
 
   .multiselect__spinner {
+    height: 32px;
+    width: 32px;
     background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
     color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
 
@@ -485,15 +540,18 @@ export default {
   }
 
   .multiselect__content-wrapper {
-    border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
+    border-color: rgb(var(--colors-gray-300));
 
     .dark & {
       border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
     }
 
     li > span.multiselect__option {
+      min-height: 32px;
+      font-size: 14px;
+      line-height: 14px;
       background-color: #fff;
-      color: rgba(var(--colors-gray-400));
+      color: rgb(var(--colors-gray-400));
 
       .dark & {
         background-color: rgba(var(--colors-gray-900));
@@ -501,19 +559,28 @@ export default {
     }
 
     .multiselect__element {
-      background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-      color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+      background-color: rgba(var(--colors-white));
+      color: rgba(var(--colors-gray-600));
 
       .dark & {
-        background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
-        color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
+        background-color: rgba(var(--colors-gray-900));
+        color: rgb(var(--colors-gray-400));
       }
 
       .multiselect__option {
+        padding: 8px 12px;
+        min-height: 32px;
+        font-size: 14px;
+        line-height: 14px;
         color: rgba(var(--colors-gray-600));
 
         .dark & {
-          color: rgba(var(--colors-gray-400));
+          &--disabled {
+            color: rgba(var(--colors-gray-500)) !important;
+            background-color: rgba(var(--colors-gray-800)) !important;
+            opacity: 0.9;
+          }
+          color: rgb(var(--colors-gray-400));
         }
 
         &.multiselect__option--selected {
@@ -525,20 +592,30 @@ export default {
           }
         }
 
+        &.multiselect__option--group {
+          color: rgba(var(--colors-primary-500));
+          background-color: rgba(var(--colors-white));
+
+          .dark & {
+            color: rgba(var(--colors-gray-500)) !important;
+            background-color: rgba(var(--colors-gray-900)) !important;
+          }
+        }
+
         &.multiselect__option--highlight {
           background-color: rgba(var(--colors-primary-500));
           color: rgba(var(--colors-white));
 
           &::after {
             background-color: rgba(var(--colors-primary-500));
-            font-weight: 700;
+            font-weight: 600;
           }
 
           &.multiselect__option--selected {
-            background-color: rgba(var(--colors-primary-400));
+            background-color: rgba(var(--colors-primary-500));
 
             .dark & {
-              background-color: rgba(var(--colors-primary-200));
+              background-color: rgba(var(--colors-primary-400));
             }
           }
         }
@@ -548,12 +625,12 @@ export default {
 
   .reorder__tag {
     background-color: rgba(var(--colors-primary-500));
-    border-radius: 3px;
+    border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 5px;
-    font-weight: 700;
+    font-weight: 600;
     transition: all 0.2s ease-in-out;
 
     &:hover {
@@ -562,11 +639,49 @@ export default {
     }
   }
 
+  .multiselect__select {
+    height: 34px;
+    width: 32px;
+  }
+
+  .multiselect--disabled {
+    opacity: 0.7;
+    .multiselect__tags {
+      background-color: rgba(var(--colors-gray-50));
+      color: rgba(var(--colors-gray-600));
+      .dark & {
+        background-color: rgba(var(--colors-gray-700));
+        color: rgb(var(--colors-gray-400));
+      }
+    }
+  }
+
+  .multiselect--disabled .multiselect__current,
+  .multiselect--disabled .multiselect__select {
+    background: none;
+  }
+
+  .multiselect__placeholder {
+    margin-bottom: 8px;
+    padding-top: 0px;
+    padding-left: 8px;
+    min-height: 16px;
+    line-height: 16px;
+    cursor: default;
+
+    color: rgb(var(--colors-gray-400));
+
+    .dark & {
+      color: rgba(var(--colors-gray-300));
+    }
+  }
+
   .multiselect__clear {
     position: absolute;
-    right: 41px;
-    height: 40px;
-    width: 40px;
+    right: 36px;
+    top: 8px;
+    height: 20px;
+    width: 20px;
     display: block;
     cursor: pointer;
     z-index: 2;
@@ -579,8 +694,11 @@ export default {
       width: 3px;
       height: 16px;
       background: #aaa;
-      top: 12px;
-      right: 4px;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      margin: auto;
     }
 
     &::before {
