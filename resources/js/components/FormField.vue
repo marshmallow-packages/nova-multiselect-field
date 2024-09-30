@@ -436,11 +436,11 @@ export default {
   .multiselect__tags {
     --tw-border-opacity: 1;
     border-width: 1px;
-    min-height: 18px;
+    // min-height: 18px;
     min-height: 2.25rem;
     border-radius: 0.25rem;
 
-    padding: 6px 56px 0 6px;
+    padding: 8px 56px 0 6px;
     overflow: hidden;
     border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
     background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
