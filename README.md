@@ -38,7 +38,7 @@ composer require marshmallow/nova-multiselect-field
 The field is used similarly to Nova's native Select field. The field type in the database should be text-based (ie `string`, `text` or `varchar`), selected values are stored as a stringified JSON array.
 
 ```php
-use Marshmallow\MultiselectField\Multiselect;
+use Outl1ne\MultiselectField\Multiselect;
 
 public function fields(Request $request)
 {
@@ -171,7 +171,7 @@ Possible options you can pass to the field using the option name as a function, 
 The translations file can be published by using the following publish command:
 
 ```bash
-php artisan vendor:publish --provider="Marshmallow\MultiselectField\FieldServiceProvider" --tag="translations"
+php artisan vendor:publish --provider="Outl1ne\MultiselectField\FieldServiceProvider" --tag="translations"
 ```
 
 You can then edit the strings to your liking.

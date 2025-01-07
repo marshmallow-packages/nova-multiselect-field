@@ -1,6 +1,6 @@
 <?php
 
-namespace Marshmallow\MultiselectField;
+namespace Outl1ne\MultiselectField;
 
 use Closure;
 use Exception;
@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\SupportsDependentFields;
-use Marshmallow\MultiselectField\Traits\MultiselectBelongsToSupport;
+use Outl1ne\MultiselectField\Traits\MultiselectBelongsToSupport;
 
 class Multiselect extends Field implements RelatableField
 {
@@ -25,7 +25,7 @@ class Multiselect extends Field implements RelatableField
      * Sets the options available for select.
      *
      * @param  array|callable
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function options($options = [], $use_value = false)
     {
@@ -199,7 +199,7 @@ class Multiselect extends Field implements RelatableField
      * Allows the field to save an actual JSON array to a SQL JSON column.
      *
      * @param bool $saveAsJSON
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function saveAsJSON($saveAsJSON = true)
     {
@@ -211,7 +211,7 @@ class Multiselect extends Field implements RelatableField
      * Sets the max number of options the user can select.
      *
      * @param int $max
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function max($max)
     {
@@ -222,7 +222,7 @@ class Multiselect extends Field implements RelatableField
      * Sets the placeholder value displayed on the field.
      *
      * @param string $placeholder
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function placeholder($placeholder)
     {
@@ -233,7 +233,7 @@ class Multiselect extends Field implements RelatableField
      * Sets the maximum number of options displayed at once.
      *
      * @param int $optionsLimit
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function optionsLimit($optionsLimit)
     {
@@ -244,7 +244,7 @@ class Multiselect extends Field implements RelatableField
      * Enables or disables reordering of the field values.
      *
      * @param bool $reorderable
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function reorderable($reorderable = true)
     {
@@ -255,7 +255,7 @@ class Multiselect extends Field implements RelatableField
      * Set custom key name for model.
      *
      * @param string|null $keyName
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function resourceKeyName($keyName = null)
     {
@@ -269,7 +269,7 @@ class Multiselect extends Field implements RelatableField
      * This forces the value saved to be a single value and not an array.
      *
      * @param bool $singleSelect
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function singleSelect($singleSelect = true)
     {
@@ -286,7 +286,7 @@ class Multiselect extends Field implements RelatableField
      * user to select the whole group at once.
      *
      * @param bool $groupSelect
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function groupSelect($groupSelect = true)
     {
@@ -297,7 +297,7 @@ class Multiselect extends Field implements RelatableField
      * Enable other-field dependency.
      *
      * @param string $otherFieldName
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function optionsDependOn($otherFieldName, $options)
     {
@@ -311,7 +311,7 @@ class Multiselect extends Field implements RelatableField
      * Enable other-field dependency that is not inside the same Flexible content.
      *
      * @param string $otherFieldName
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function optionsDependOnOutsideFlexible($otherFieldName, $options)
     {
@@ -326,7 +326,7 @@ class Multiselect extends Field implements RelatableField
      * Set max selectable value count as a keyed array of numbers.
      *
      * @param array $maxOptions
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function optionsDependOnMax(array $maxOptions)
     {
@@ -337,7 +337,7 @@ class Multiselect extends Field implements RelatableField
      * Sets the limit value for the field.
      *
      * @param string $limit
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function limit($limit)
     {
@@ -348,7 +348,7 @@ class Multiselect extends Field implements RelatableField
      * Sets group name for selects that need to have their values distinct.
      *
      * @param string $group
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function distinct($group = "")
     {
@@ -403,7 +403,7 @@ class Multiselect extends Field implements RelatableField
      * Sets delimiter for joining values on index
      *
      * @param  string $delimiter
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      */
     public function indexDelimiter(string $delimiter)
     {
@@ -414,7 +414,7 @@ class Multiselect extends Field implements RelatableField
      * Sets amount of characters that can be shown on index at once
      *
      * @param  int $limit
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      */
     public function indexCharDisplayLimit(int $limit)
     {
@@ -425,7 +425,7 @@ class Multiselect extends Field implements RelatableField
      * Sets amount of values that can be shown on index at once
      *
      * @param  int $limit
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      */
     public function indexValueDisplayLimit(int $limit)
     {

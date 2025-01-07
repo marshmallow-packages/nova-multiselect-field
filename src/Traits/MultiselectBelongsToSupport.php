@@ -1,6 +1,6 @@
 <?php
 
-namespace Marshmallow\MultiselectField\Traits;
+namespace Outl1ne\MultiselectField\Traits;
 
 use Exception;
 use RuntimeException;
@@ -22,7 +22,7 @@ trait MultiselectBelongsToSupport
      * Makes the field to manage a BelongsTo relationship.
      *
      * @param string $resourceClass The Nova Resource class for the other model.
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function belongsTo($resourceClass, $async = false)
     {
@@ -103,7 +103,7 @@ trait MultiselectBelongsToSupport
      * Makes the field to manage a BelongsToMany relationship.
      *
      * @param string $resourceClass The Nova Resource class for the other model.
-     * @return \Marshmallow\MultiselectField\Multiselect
+     * @return \Outl1ne\MultiselectField\Multiselect
      **/
     public function belongsToMany($resourceClass, $async = true)
     {

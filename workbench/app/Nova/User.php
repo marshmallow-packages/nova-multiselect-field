@@ -9,7 +9,7 @@ use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
-use Marshmallow\MultiselectField\Multiselect;
+use Outl1ne\MultiselectField\Multiselect;
 
 class User extends Resource
 {
