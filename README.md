@@ -5,10 +5,13 @@
 
 This [Laravel Nova](https://nova.laravel.com) package adds a multiselect to Nova's arsenal of fields.
 
+> [!important]
+> This package was originally forked from [outl1ne/nova-multiselect-field](https://github.com/outl1ne/nova-multiselect-field). Since we were making many opinionated changes, we decided to continue development in our own version rather than submitting pull requests that might not benefit all users of the original package. You’re welcome to use this package—we’re actively maintaining it. If you encounter any issues, please don’t hesitate to reach out.
+
 ## Requirements
 
-- `php: >=8.0`
-- `laravel/nova: ^4.1`
+- `php: >=8.1`
+- `laravel/nova: ^5.0`
 
 ## Features
 
@@ -251,6 +254,7 @@ Nova.booting((Vue, router, store) => {
 
 - [Tarvo Reinpalu](https://github.com/Tarpsvo)
 - [shentao/vue-multiselect](https://vue-multiselect.js.org)
+- [outl1ne/nova-multiselect-field](https://github.com/outl1ne/nova-multiselect-field)
 
 ## License
 
