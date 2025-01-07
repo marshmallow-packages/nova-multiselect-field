@@ -31,13 +31,13 @@
   },
   "autoload": {
     "psr-4": {
-      "Marshmallow\\MultiselectField\\": "src/"
+      "Outl1ne\\MultiselectField\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Marshmallow\\MultiselectField\\FieldServiceProvider"
+        "Outl1ne\\MultiselectField\\FieldServiceProvider"
       ]
     }
   },
