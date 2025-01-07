@@ -22,12 +22,6 @@ This [Laravel Nova](https://nova.laravel.com) package adds a multiselect to Nova
 - Distinct values between multiple multiselects
 - Fully compatible with light and dark modes
 
-## Screenshots
-
-![Detail View](docs/detail-light.jpeg)
-
-![Form View](docs/form-dark.jpeg)
-
 ## Installation
 
 Install the package in a Laravel Nova project via Composer:
