@@ -9,7 +9,7 @@ use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
-use Outl1ne\MultiselectField\Multiselect;
+use Marshmallow\MultiselectField\Multiselect;
 
 class User extends Resource
 {
@@ -33,7 +33,9 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id',
+        'name',
+        'email',
     ];
 
     /**
