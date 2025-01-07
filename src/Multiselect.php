@@ -109,7 +109,7 @@ class Multiselect extends Field implements RelatableField
         return $this->api($apiUrl, $resourceClass, $keyName);
     }
 
-    protected function resolveAttribute($resource, string $attribute): mixed
+    protected function resolveAttribute($resource, $attribute)
     {
         $singleSelect = $this->meta['singleSelect'] ?? false;
         $value = data_get($resource, str_replace('->', '.', $attribute));
@@ -144,7 +144,7 @@ class Multiselect extends Field implements RelatableField
         return false;
     }
 
-    public function resolveForAction(NovaRequest $request): void
+    public function resolveForAction($request)
     {
         if (!is_null($this->value)) {
             return;
