@@ -27,7 +27,8 @@
     "outl1ne/nova-translations-loader": "^5.0"
   },
   "require-dev": {
-    "nova-kit/nova-devtool": "^1.2.1"
+    "nova-kit/nova-devtool": "^1.2.1",
+    "phpstan/phpstan": "^2.1"
   },
   "autoload": {
     "psr-4": {

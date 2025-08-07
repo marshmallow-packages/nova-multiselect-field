@@ -49,7 +49,7 @@ trait MultiselectBelongsToSupport
                 $models = isset($value) ? collect([$model::where($keyName, $value)->first()]) : collect();
             } else {
                 $models = forward_static_call(
-                    $this->associatableQueryCallable($request, $model, $resourceClass),
+                    $this->associatableQueryCallable($request, $model),
                     $request,
                     $model::query()
                 )->limit(1000)->get();
@@ -119,16 +119,16 @@ trait MultiselectBelongsToSupport
 
             // Default value
             if ($request->isCreateOrAttachRequest()) {
-                if (is_null($value) || $value->isEmpty()) $value = $this->resolveDefaultValue($request) ?? $value;
+                if ($value->isEmpty()) $value = $this->resolveDefaultValue($request) ?? $value;
             }
 
             $models = $async
                 ? $value
-                : forward_static_call($this->associatableQueryCallable($request, $model, $resourceClass), $request, $model::query())->get();
+                : forward_static_call($this->associatableQueryCallable($request, $model), $request, $model::query())->get();
 
             $this->setOptionsFromModels($models, $resourceClass);
 
-            $resource = isset($value) ? new $resourceClass($models->first()) : null;
+            $resource = $models->isNotEmpty() ? new $resourceClass($models->first()) : null;
 
             $this->withMeta([
                 'belongsToManyResourceName' => $resource ? $resource::uriKey() : null,
@@ -218,7 +218,7 @@ trait MultiselectBelongsToSupport
      *
      * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @return string
+     * @return ?string
      */
     protected function associatableQueryMethod(NovaRequest $request, $model)
     {
@@ -227,6 +227,8 @@ trait MultiselectBelongsToSupport
         if (method_exists($request->resource(), $method)) {
             return $method;
         }
+
+        return null;
     }
 
     /**
