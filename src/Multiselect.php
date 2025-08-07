@@ -24,9 +24,10 @@ class Multiselect extends Field implements RelatableField
     /**
      * Sets the options available for select.
      *
-     * @param  array|callable
+     * @param  array|callable $options The options for the multiselect field
+     * @param  bool $use_value Whether to use the value as both key and value
      * @return \Marshmallow\MultiselectField\Multiselect
-     **/
+     */
     public function options($options = [], $use_value = false)
     {
         if (is_callable($options)) $options = call_user_func($options);
@@ -380,7 +381,7 @@ class Multiselect extends Field implements RelatableField
      *
      * @param  \Illuminate\Support\Collection  $models
      * @param  string  $resourceClass
-     * @return void
+     * @return \Marshmallow\MultiselectField\Multiselect
      */
     public function setOptionsFromModels(Collection $models, $resourceClass)
     {
