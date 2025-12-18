@@ -118,7 +118,7 @@ class Multiselect extends Field implements RelatableField
 
         if ($value instanceof Collection) return $value;
         if ($saveAsJson || $singleSelect) return $value;
-        return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
+        return is_array($value) || is_object($value) ? (array) $value : ($value !== null ? json_decode($value) : null);
     }
 
     protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
