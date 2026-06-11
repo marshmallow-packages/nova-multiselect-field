@@ -1,3 +1,5 @@
+![alt text](https://marshmallow.dev/cdn/media/logo-red-237x46.png "marshmallow.")
+
 # Nova Multiselect
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/marshmallow/nova-multiselect-field.svg?style=flat-square)](https://packagist.org/packages/marshmallow/nova-multiselect-field)
@@ -10,8 +12,8 @@ This [Laravel Nova](https://nova.laravel.com) package adds a multiselect to Nova
 
 ## Requirements
 
-- `php: >=8.1`
-- `laravel/nova: ^5.0`
+- `php: >=8.0`
+- `laravel/nova: ^4.27|^5.0`
 
 ## Features
 
@@ -244,11 +246,25 @@ Nova.booting((Vue, router, store) => {
 });
 ```
 
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for recent changes.
+
+## Contributing
+
+Please see the [Marshmallow contributing process](https://github.com/marshmallow-packages) for details.
+
+## Security Vulnerabilities
+
+Please report security vulnerabilities by email rather than via the public issue tracker.
+
 ## Credits
 
 - [Tarvo Reinpalu](https://github.com/Tarpsvo)
+- [Optimist Digital](https://github.com/optimistdigital)
 - [shentao/vue-multiselect](https://vue-multiselect.js.org)
 - [outl1ne/nova-multiselect-field](https://github.com/outl1ne/nova-multiselect-field)
+- [All Contributors](https://github.com/marshmallow-packages/nova-multiselect-field/contributors)
 
 ## License
 
