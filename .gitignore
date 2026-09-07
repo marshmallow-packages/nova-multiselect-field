@@ -1,2 +1,8 @@
 /.DS_Store
 .DS_Store
+vendor/
+node_modules/
+npm-debug.log
+.idea/
+.phpunit.result.cache
+/.claude
